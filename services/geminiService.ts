@@ -173,6 +173,68 @@ export const generateGrowthMatrix = async (
   }
 };
 
+// --- CAMPAIGN CONFIG AUTO-FILL ---
+
+export const autoConfigureCampaign = async (
+  apiKey: string,
+  magicPrompt: string,
+  language: Language = 'es'
+): Promise<Partial<CampaignConfig>> => {
+  const ai = getClient(apiKey);
+  
+  const prompt = `
+    Act as an expert Marketing Strategist.
+    Analyze the following user intent (Magic Prompt) and map it to the best configuration parameters for a social media campaign.
+    
+    USER PROMPT: "${magicPrompt}"
+
+    Available Options Mapping (Select the closest match):
+    - Tone: 'Cercano / Ciudadano', 'Corporativo / Serio', 'Disruptivo / Viral', 'Inspiracional / Épico', 'Comparativo / Agresivo', 'Satírico / Burlón'
+    - Frequency: 'Alta (Dominancia de Algoritmo)', 'Media (Estándar de Mercado)', 'Baja (Mantenimiento)'
+    - Resource Level: 'Alto (Producción/Estudio)', 'Medio (In-House)', 'Bajo (UGC/Móvil)'
+    - KPI: 'Conversión (Intención de Voto)', 'Leads (Captación)', 'Alcance (Brand Awareness)', 'Engagement (Comunidad)', 'Robo de Cuota (Market Share)'
+    - Content Mix: 'Promocional (Venta Directa)', 'Educativo (Valor)', 'Entretenimiento (Viral)', 'Híbrido (40/40/20)'
+
+    Task:
+    1. Extract a concise 'strategicObjective' (max 20 words).
+    2. Suggest the best 'tone', 'frequency', 'resourceLevel', 'kpi', and 'contentMix'.
+    3. Select top 2 'platforms' and top 2 'formats' best suited for this goal.
+    4. Determine if 'campaignMode' should be 'GROWTH' (standard) or 'DOMINATION' (aggressive/competitor focused).
+  `;
+
+  const schema: Schema = {
+    type: Type.OBJECT,
+    properties: {
+      strategicObjective: { type: Type.STRING },
+      tone: { type: Type.STRING },
+      frequency: { type: Type.STRING },
+      resourceLevel: { type: Type.STRING },
+      kpi: { type: Type.STRING },
+      contentMix: { type: Type.STRING },
+      campaignMode: { type: Type.STRING, enum: ['GROWTH', 'DOMINATION'] },
+      platforms: { type: Type.ARRAY, items: { type: Type.STRING } },
+      formats: { type: Type.ARRAY, items: { type: Type.STRING } }
+    },
+    required: ['strategicObjective', 'tone', 'frequency', 'kpi', 'platforms']
+  };
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: schema
+    }
+  });
+
+  try {
+    return JSON.parse(response.text || "{}");
+  } catch (e) {
+    console.error("Failed to parse AutoConfig JSON", e);
+    return {};
+  }
+}
+
 // --- CAMPAIGN GENERATION ---
 
 export const generateCampaignPlan = async (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateCampaignPlan } from '../services/geminiService';
+import { generateCampaignPlan, autoConfigureCampaign } from '../services/geminiService';
 import { CampaignConfig, CampaignPlan, CampaignMode } from '../types';
 import { useLanguage, Language } from '../i18n';
 
@@ -13,6 +13,7 @@ const FORMATS_LIST = ['Reels', 'Historias', 'Carruseles', 'Hilos', 'Video Largo'
 
 export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) => {
   const [loading, setLoading] = useState(false);
+  const [configuring, setConfiguring] = useState(false);
   const [plan, setPlan] = useState<CampaignPlan | null>(null);
   const { t } = useLanguage();
 
@@ -47,17 +48,39 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
     return ['Conversión (Intención de Voto)', 'Leads (Captación)', 'Alcance (Brand Awareness)', 'Engagement (Comunidad)'];
   };
 
+  // --- ACTIONS ---
+
+  const handleAutoConfig = async () => {
+    if (!config.magicPrompt || !apiKey) return;
+    setConfiguring(true);
+    try {
+      // Fix: Cast language to Language type
+      const suggested = await autoConfigureCampaign(apiKey, config.magicPrompt, language as Language);
+      setConfig(prev => ({
+        ...prev,
+        ...suggested,
+        // Ensure arrays are merged or overwritten safely
+        platforms: suggested.platforms || prev.platforms,
+        formats: suggested.formats || prev.formats,
+        campaignMode: (suggested.campaignMode as CampaignMode) || prev.campaignMode
+      }));
+    } catch (e) {
+      console.error(e);
+      alert('Error en auto-configuración.');
+    } finally {
+      setConfiguring(false);
+    }
+  };
+
   const handleCreate = async () => {
     if (!config.magicPrompt || !apiKey) return;
     setLoading(true);
     try {
-      // Auto-fill objective if empty from magic prompt
       const finalConfig = {
         ...config,
         strategicObjective: config.strategicObjective || config.magicPrompt.slice(0, 100)
       };
       
-      // Fix: Cast language to Language type to avoid string mismatch
       const result = await generateCampaignPlan(apiKey, finalConfig, language as Language);
       setPlan(result);
     } catch (e) {
@@ -77,7 +100,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
   return (
     <div className={`h-full bg-avispa-dark text-slate-200 overflow-y-auto transition-colors duration-700 ${config.campaignMode === 'DOMINATION' ? 'selection:bg-red-900 selection:text-white' : ''}`}>
       {/* HEADER PANEL */}
-      <div className={`p-8 border-b transition-colors duration-500 sticky top-0 z-20 shadow-xl ${config.campaignMode === 'DOMINATION' ? 'bg-red-950/90 border-red-900' : 'bg-slate-900 border-avispa-panel'}`}>
+      <div className={`p-8 border-b transition-colors duration-500 sticky top-0 z-20 shadow-xl backdrop-blur-md ${config.campaignMode === 'DOMINATION' ? 'bg-red-950/90 border-red-900' : 'bg-slate-900/90 border-avispa-panel'}`}>
         <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
                 <span className="text-2xl">{config.campaignMode === 'DOMINATION' ? '⚔️' : '🗓️'}</span>
@@ -106,7 +129,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
             </div>
         </div>
 
-        {/* DOMINATION MODE WARNING & INPUT */}
+        {/* DOMINATION MODE WARNING */}
         {config.campaignMode === 'DOMINATION' && (
             <div className="mb-6 animate-pulse-slow">
                 <div className="bg-red-900/20 border border-red-800 p-4 rounded-lg mb-4">
@@ -128,16 +151,43 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
         )}
 
         {/* MAGIC PROMPT SECTION */}
-        <div className={`bg-slate-800/50 border rounded-lg p-4 mb-6 transition-colors relative group ${config.campaignMode === 'DOMINATION' ? 'border-red-900/50 hover:border-red-500' : 'border-slate-700 hover:border-avispa-accent'}`}>
-            <div className={`flex items-center gap-2 mb-2 font-bold text-xs uppercase tracking-wider ${config.campaignMode === 'DOMINATION' ? 'text-red-500' : 'text-avispa-accent'}`}>
-                <span className="animate-pulse">✨</span> {t.camp.magic_prompt}
+        <div className={`bg-slate-800/50 border rounded-lg p-0 mb-6 transition-colors relative group overflow-hidden shadow-inner ${config.campaignMode === 'DOMINATION' ? 'border-red-900/50 hover:border-red-500' : 'border-slate-700 hover:border-avispa-accent'}`}>
+            <div className="p-4 relative">
+              <div className={`flex items-center gap-2 mb-2 font-bold text-xs uppercase tracking-wider ${config.campaignMode === 'DOMINATION' ? 'text-red-500' : 'text-avispa-accent'}`}>
+                  <span className="animate-pulse">✨</span> {t.camp.magic_prompt}
+              </div>
+              <textarea
+                  value={config.magicPrompt}
+                  onChange={(e) => setConfig({ ...config, magicPrompt: e.target.value })}
+                  className="w-full bg-transparent text-lg text-white placeholder-slate-600 outline-none resize-none font-light h-20 mb-8"
+                  placeholder={t.camp.magic_placeholder}
+              />
+              
+              {/* Auto Config Button */}
+              <div className="absolute bottom-3 right-3">
+                <button 
+                  onClick={handleAutoConfig}
+                  disabled={configuring || !config.magicPrompt}
+                  className={`
+                    text-xs font-bold font-mono px-4 py-2 rounded-full border transition-all flex items-center gap-2 shadow-lg
+                    ${config.campaignMode === 'DOMINATION' 
+                      ? 'bg-red-900 border-red-500 text-red-100 hover:bg-red-800' 
+                      : 'bg-slate-700 border-avispa-accent text-avispa-accent hover:bg-slate-600 hover:text-white'}
+                  `}
+                >
+                  {configuring ? (
+                     <>
+                      <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full"></span>
+                      CALCULATING...
+                     </>
+                  ) : (
+                     <>
+                      🪄 AUTOCONFIGURAR PARÁMETROS
+                     </>
+                  )}
+                </button>
+              </div>
             </div>
-            <textarea
-                value={config.magicPrompt}
-                onChange={(e) => setConfig({ ...config, magicPrompt: e.target.value })}
-                className="w-full bg-transparent text-lg text-white placeholder-slate-600 outline-none resize-none font-light h-20"
-                placeholder={t.camp.magic_placeholder}
-            />
         </div>
 
         {/* PARAMETERS GRID */}
@@ -331,38 +381,61 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
                 </div>
 
                 {/* Timeline */}
-                <div className={`relative border-l-2 ml-4 space-y-8 pb-12 ${config.campaignMode === 'DOMINATION' ? 'border-red-900/50' : 'border-slate-700'}`}>
+                <div className="relative ml-4 pb-12">
+                    {/* Vertical Line */}
+                    <div className={`absolute top-0 bottom-0 left-[7px] w-0.5 ${config.campaignMode === 'DOMINATION' ? 'bg-red-900' : 'bg-slate-700'}`}></div>
+
                     {plan.steps.map((step, idx) => (
-                        <div key={idx} className="relative pl-8 group">
+                        <div key={idx} className="relative pl-12 mb-10 group last:mb-0">
                             {/* Timeline Dot */}
-                            <span className={`absolute -left-[9px] top-6 w-4 h-4 rounded-full bg-slate-900 border-2 transition-colors shadow-[0_0_10px_rgba(249,115,22,0.5)] ${config.campaignMode === 'DOMINATION' ? 'border-red-500 group-hover:bg-red-500' : 'border-avispa-accent group-hover:bg-avispa-accent'}`}></span>
+                            <div className={`
+                                absolute left-0 top-6 w-4 h-4 rounded-full border-2 z-10 bg-slate-900 transition-all duration-300
+                                ${config.campaignMode === 'DOMINATION' 
+                                  ? 'border-red-600 group-hover:bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]' 
+                                  : 'border-avispa-accent group-hover:bg-avispa-accent shadow-[0_0_10px_rgba(250,204,21,0.5)]'}
+                            `}></div>
                             
                             {/* Card */}
-                            <div className={`bg-avispa-panel border rounded-lg overflow-hidden transition-all shadow-lg group-hover:shadow-2xl ${config.campaignMode === 'DOMINATION' ? 'border-red-900/30 hover:border-red-500' : 'border-slate-700 hover:border-avispa-accent'}`}>
+                            <div className={`
+                                relative bg-slate-900 border rounded-xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl
+                                ${config.campaignMode === 'DOMINATION' 
+                                  ? 'border-red-900/40 hover:border-red-500 shadow-red-900/10' 
+                                  : 'border-slate-700 hover:border-avispa-accent/50 shadow-black/50'}
+                            `}>
                                 {/* Card Header */}
-                                <div className="bg-slate-900/50 p-4 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
+                                <div className="bg-white/5 p-4 flex flex-wrap justify-between items-center gap-4 border-b border-white/5">
                                     <div className="flex items-center gap-3">
-                                        <div className="bg-slate-800 text-slate-300 font-mono text-sm px-3 py-1 rounded border border-slate-700">
+                                        <div className={`
+                                            font-mono text-xs font-bold px-2 py-1 rounded border
+                                            ${config.campaignMode === 'DOMINATION' 
+                                              ? 'bg-red-950 border-red-900 text-red-400' 
+                                              : 'bg-slate-800 border-slate-600 text-avispa-accent'}
+                                        `}>
                                             DIA {step.day}
                                         </div>
-                                        {step.date && <span className="text-xs text-slate-500 font-mono">{step.date}</span>}
-                                        <h4 className="font-bold text-white">{step.phase}</h4>
+                                        {step.date && <span className="text-xs text-slate-500 font-mono tracking-widest">{step.date}</span>}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-bold bg-blue-900/30 text-blue-400 border border-blue-900 px-2 py-1 rounded uppercase">{step.channel}</span>
-                                        <span className="text-xs font-bold bg-red-900/30 text-red-400 border border-red-900 px-2 py-1 rounded uppercase">{step.format}</span>
+                                        <span className="text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded uppercase">{step.channel}</span>
+                                        <span className="text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded uppercase">{step.format}</span>
                                     </div>
                                 </div>
                                 
                                 {/* Card Body */}
-                                <div className="p-5">
-                                    <div className="mb-4">
-                                        <p className="text-sm text-slate-400 uppercase tracking-widest text-[10px] mb-1 font-bold">{t.camp.production}</p>
-                                        <p className="text-slate-200 font-light leading-relaxed whitespace-pre-wrap bg-slate-800/30 p-3 rounded border border-white/5">
-                                            {step.contentParams}
+                                <div className="p-6">
+                                    <h4 className="text-xl font-bold text-white mb-4">{step.phase}</h4>
+                                    
+                                    <div className="mb-6">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2 flex items-center gap-2">
+                                            <span className="w-1 h-1 bg-slate-500 rounded-full"></span>
+                                            {t.camp.production}
                                         </p>
+                                        <div className="bg-black/20 p-4 rounded-lg border border-white/5 text-slate-300 font-light leading-relaxed whitespace-pre-wrap text-sm">
+                                            {step.contentParams}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold border-t border-white/5 pt-3">
+
+                                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold font-mono bg-emerald-900/10 border border-emerald-900/30 p-2 rounded inline-block">
                                         <span className="text-lg">🎯</span>
                                         KPI TARGET: {step.kpiTarget}
                                     </div>
@@ -375,10 +448,12 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
         )}
 
         {!plan && !loading && (
-             <div className="h-64 flex flex-col items-center justify-center text-slate-600 border-2 border-dashed border-slate-800 rounded-lg">
-                <span className="text-4xl mb-4 opacity-50">📊</span>
-                <p className="font-mono text-lg text-slate-500">{t.camp.no_plan}</p>
-                <p className="text-sm opacity-50">Configura los parámetros superiores para iniciar.</p>
+             <div className="h-64 flex flex-col items-center justify-center text-slate-600 border-2 border-dashed border-slate-800 rounded-lg bg-slate-900/30">
+                <span className="text-5xl mb-4 opacity-50 grayscale">📊</span>
+                <p className="font-mono text-lg text-slate-400 font-bold">{t.camp.no_plan}</p>
+                <p className="text-sm opacity-50 mt-2 text-center max-w-sm">
+                    Utiliza la <span className="text-avispa-accent font-bold">Autoconfiguración</span> arriba o ajusta manualmente los parámetros para generar tu estrategia.
+                </p>
             </div>
         )}
       </div>

@@ -17,7 +17,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
   const { t } = useLanguage();
 
   const [config, setConfig] = useState<CampaignConfig>({
-    magicPrompt: 'Campaña de posicionamiento para "Agua Bonita Coffee" como la bebida esencial que combina herencia latina con sostenibilidad para la Gen Z.',
+    magicPrompt: 'Estrategia de expansión para "Agua Bonita Coffee" (Colombia). Posicionar como café de especialidad premium sostenible en mercados internacionales.',
     campaignMode: 'GROWTH',
     targetRivals: '',
     duration: '2 Semanas (Intensivo)',

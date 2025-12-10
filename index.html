@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>La Avispa | SIEE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -23,10 +23,23 @@
                 light: '#f1f5f9', // Slate 100
                 success: '#10b981',
                 warning: '#f59e0b',
+                danger: '#ef4444',
               }
             },
             animation: {
               'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'slide-up': 'slideUp 0.3s ease-out forwards',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              }
             }
           }
         }
@@ -36,21 +49,88 @@
       body {
         background-color: #0f172a;
         color: #f1f5f9;
+        background-image: 
+          linear-gradient(rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+        background-size: 40px 40px;
       }
+      
+      /* Markdown Styles */
+      .prose h1, .prose h2, .prose h3 {
+        font-family: 'JetBrains Mono', monospace;
+        color: #FACC15;
+        font-weight: 700;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        letter-spacing: -0.02em;
+      }
+      .prose h1 { font-size: 1.5rem; border-bottom: 1px solid rgba(250, 204, 21, 0.2); padding-bottom: 0.5rem; }
+      .prose h2 { font-size: 1.25rem; }
+      .prose h3 { font-size: 1.1rem; color: #e2e8f0; }
+      
+      .prose p { margin-bottom: 1em; line-height: 1.7; color: #cbd5e1; }
+      
+      .prose strong { color: #ffffff; font-weight: 700; }
+      
+      .prose ul { list-style-type: none; padding-left: 0; margin-bottom: 1em; }
+      .prose ul li { 
+        position: relative; 
+        padding-left: 1.5em; 
+        margin-bottom: 0.5em; 
+        color: #cbd5e1;
+      }
+      .prose ul li::before {
+        content: "▹";
+        position: absolute;
+        left: 0;
+        color: #FACC15;
+      }
+      
+      .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; color: #94a3b8; }
+      .prose ol li { margin-bottom: 0.5em; padding-left: 0.5em; color: #cbd5e1; }
+      .prose ol li::marker { color: #FACC15; font-family: 'JetBrains Mono', monospace; }
+
+      .prose blockquote {
+        border-left: 4px solid #FACC15;
+        background: rgba(30, 41, 59, 0.5);
+        padding: 1rem;
+        font-style: italic;
+        color: #94a3b8;
+        margin: 1.5em 0;
+      }
+
+      .prose code {
+        font-family: 'JetBrains Mono', monospace;
+        background: rgba(15, 23, 42, 0.5);
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+        font-size: 0.85em;
+        color: #e2e8f0;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .prose a {
+        color: #60a5fa;
+        text-decoration: none;
+        border-bottom: 1px dashed #60a5fa;
+      }
+      .prose a:hover { color: #93c5fd; border-style: solid; }
+
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
       }
       ::-webkit-scrollbar-track {
-        background: #1e293b; 
+        background: #0f172a; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #475569; 
-        border-radius: 4px;
+        background: #334155; 
+        border-radius: 2px;
+        border: 2px solid #0f172a;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; 
+        background: #475569; 
       }
     </style>
   <script type="importmap">

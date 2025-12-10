@@ -10,7 +10,8 @@ const getClient = (apiKey: string) => new GoogleGenAI({ apiKey });
 const PROMPTS = {
   MARKET_INTEL: `You are Agent B2 (Market Intelligence) for "La Avispa". 
   Your Goal: Deep Research using Google Search.
-  Task: Identify competitors, market share, consumer trends, and pricing for the user's input.
+  Task: Identify competitors, market share, consumer trends, and pricing. 
+  CRITICAL: If a URL is provided (e.g. aguabonitacoffee.com), prioritize extracting facts from that specific source using Google Search. Verify origins (e.g. Colombia) and product details accurately. Do not hallucinate based on similar brand names from other countries.
   Output: Factual, data-driven report. Cite sources.`,
   
   STRATEGIST: `You are Agent B3 (CMO / Strategist). 

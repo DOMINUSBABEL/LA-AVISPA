@@ -10,6 +10,7 @@ export const LanguageSelector: React.FC<Props> = ({ variant = 'sidebar' }) => {
 
   const langs: { code: Language; label: string }[] = [
     { code: 'es', label: 'ES' },
+    { code: 'en', label: 'EN' },
     { code: 'fr', label: 'FR' },
     { code: 'de', label: 'DE' }
   ];

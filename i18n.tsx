@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-export type Language = 'es' | 'fr' | 'de';
+export type Language = 'es' | 'fr' | 'de' | 'en';
 
 export const translations = {
   es: {
@@ -69,6 +69,74 @@ export const translations = {
         active_plan: 'Plan Activo',
         production: 'Instrucciones de Producción',
         no_plan: 'NO HAY ESTRATEGIA GENERADA'
+    }
+  },
+  en: {
+    login: {
+        operator: '// Operator ID',
+        key: '// Access Key',
+        btn: 'Initialize System',
+        access_denied: 'ACCESS DENIED: INVALID CREDENTIALS',
+        dev_by: 'Developed by Consultora Talleyrand © 2025',
+        secure: 'SECURE CONNECTION ESTABLISHED'
+    },
+    sidebar: {
+        cmd: 'MARKET COMMAND',
+        grid: 'GROWTH GRID',
+        cp: 'CRONO_POSTING',
+        system: 'SYSTEM: ONLINE'
+    },
+    cmd: {
+        title: 'MARKET_COMMAND',
+        subtitle: 'SIEE ACTIVE SEQUENCE',
+        placeholder: 'ENTER STRATEGIC OBJECTIVE...',
+        exec: 'EXECUTE',
+        running: 'RUNNING',
+        processing: 'PROCESSING...',
+        init_seq: 'INITIALIZING SEQUENCE...',
+        sources: 'INTELLIGENCE SOURCES:',
+        awaiting: 'Awaiting Directives. Enter a product or market objective.',
+        agent_market: 'B2 - Intelligence',
+        agent_strat: 'B3 - Strategist',
+        agent_creative: 'B4 - Creative',
+        agent_guardian: 'B5 - Guardian'
+    },
+    grid: {
+        title: 'GROWTH_GRID',
+        generate: 'GENERATE MATRIX',
+        calculating: 'CALCULATING...',
+        placeholder: 'Product Name...',
+        headers: 'PERSONA \\ USP',
+        details: 'COORDINATES',
+        hook: 'HOOK / HEADLINE',
+        pain: 'PAIN POINT',
+        solution: 'SOLUTION PITCH',
+        channel: 'RECOMMENDED CHANNEL',
+        empty: 'Select a matrix cell to reveal viral payload.'
+    },
+    camp: {
+        title: 'CRONOPOSTING GENERATOR',
+        subtitle: 'Advanced Configuration',
+        magic_prompt: 'Tactical Autoconfiguration (Magic Prompt)',
+        magic_placeholder: 'Describe your objective and AI will adjust all parameters...',
+        generate: 'GENERATE STRATEGY',
+        processing: 'PROCESSING STRATEGY...',
+        params_time: 'Temporal Parameters',
+        params_strat: 'Content Strategy',
+        params_res: 'Channels & Resources',
+        duration: 'DURATION',
+        start_date: 'START DATE',
+        frequency: 'FREQUENCY',
+        tone: 'TONE',
+        mix: 'CONTENT MIX',
+        kpi: 'MAIN KPI',
+        res_level: 'RESOURCE LEVEL',
+        platforms: 'ACTIVE PLATFORMS',
+        formats: 'KEY FORMATS',
+        obj_y: 'STRATEGIC OBJECTIVE (Y)',
+        active_plan: 'Active Plan',
+        production: 'Production Instructions',
+        no_plan: 'NO STRATEGY GENERATED'
     }
   },
   fr: {

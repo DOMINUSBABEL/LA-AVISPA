@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLanguage } from '../i18n';
+import { LanguageSelector } from './LanguageSelector';
 
 type View = 'COMMAND' | 'MATRIX' | 'CAMPAIGN';
 
@@ -8,6 +10,8 @@ interface Props {
 }
 
 export const Sidebar: React.FC<Props> = ({ currentView, setView }) => {
+  const { t } = useLanguage();
+
   const btnClass = (view: View) => `
     w-full p-4 text-left font-mono text-sm transition-all border-l-2
     ${currentView === view 
@@ -25,21 +29,24 @@ export const Sidebar: React.FC<Props> = ({ currentView, setView }) => {
 
         <nav className="space-y-1">
           <button onClick={() => setView('COMMAND')} className={btnClass('COMMAND')}>
-            <span className="mr-3">☢️</span> MARKET COMMAND
+            <span className="mr-3">☢️</span> {t.sidebar.cmd}
           </button>
           <button onClick={() => setView('MATRIX')} className={btnClass('MATRIX')}>
-            <span className="mr-3">💠</span> GROWTH GRID
+            <span className="mr-3">💠</span> {t.sidebar.grid}
           </button>
           <button onClick={() => setView('CAMPAIGN')} className={btnClass('CAMPAIGN')}>
-            <span className="mr-3">🗓️</span> CRONO_POSTING
+            <span className="mr-3">🗓️</span> {t.sidebar.cp}
           </button>
         </nav>
       </div>
 
-      <div className="p-6 text-xs text-slate-600 font-mono">
-        <p>SYSTEM: ONLINE</p>
-        <p>MODEL: GEMINI 3</p>
-        <p className="mt-2 text-avispa-accent">SIEE v2.5</p>
+      <div>
+        <LanguageSelector variant="sidebar" />
+        <div className="p-6 pt-2 text-xs text-slate-600 font-mono border-t border-slate-800">
+            <p>{t.sidebar.system}</p>
+            <p>MODEL: GEMINI 3</p>
+            <p className="mt-2 text-avispa-accent">SIEE v2.5</p>
+        </div>
       </div>
     </div>
   );

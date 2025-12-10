@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AgentRole, CampaignConfig, CampaignPlan, GrowthMatrixData } from "../types";
+import { Language } from "../i18n";
 
 // Helper to get client (assumes API key is passed from UI state)
 const getClient = (apiKey: string) => new GoogleGenAI({ apiKey });
@@ -33,14 +34,17 @@ export const runAgent = async (
   apiKey: string,
   role: AgentRole,
   input: string,
-  context: string = ""
+  context: string = "",
+  language: Language = 'es'
 ): Promise<{ text: string; sources?: { title: string; uri: string }[] }> => {
   const ai = getClient(apiKey);
   
   let model = 'gemini-3-pro-preview'; // Default for complex tasks
   let tools: any[] = [];
   let thinkingConfig: any = undefined;
-  let systemInstruction = PROMPTS[role];
+  
+  // Inject language instruction
+  let systemInstruction = PROMPTS[role] + `\n\nCRITICAL INSTRUCTION: You MUST output your response in the following language code: "${language}".`;
 
   // Specific Configuration per Role
   switch (role) {
@@ -106,7 +110,8 @@ export const generateGrowthMatrix = async (
   apiKey: string,
   productName: string,
   personas: string[],
-  valueProps: string[]
+  valueProps: string[],
+  language: Language = 'es'
 ): Promise<GrowthMatrixData[]> => {
   const ai = getClient(apiKey);
 
@@ -117,6 +122,8 @@ export const generateGrowthMatrix = async (
     
     Personas: ${personas.join(', ')}
     Value Propositions: ${valueProps.join(', ')}
+    
+    CRITICAL: The content of 'headline', 'painPoint', and 'solutionPitch' MUST be in language: "${language}".
 
     Requirements:
     - 'headline': A catchy hook/subject line.
@@ -169,13 +176,16 @@ export const generateGrowthMatrix = async (
 
 export const generateCampaignPlan = async (
   apiKey: string,
-  config: CampaignConfig
+  config: CampaignConfig,
+  language: Language = 'es'
 ): Promise<CampaignPlan> => {
   const ai = getClient(apiKey);
 
   const prompt = `
     Create a highly professional Marketing Cronoposting Plan (Campaign Schedule).
     
+    CRITICAL: The output (Strategy Summary, Phases, Content Params) MUST be in language: "${language}".
+
     INPUT CONTEXT (MAGIC PROMPT): "${config.magicPrompt}"
     STRATEGIC OBJECTIVE: "${config.strategicObjective}"
     

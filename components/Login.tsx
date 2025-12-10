@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../i18n';
+import { LanguageSelector } from './LanguageSelector';
 
 interface Props {
   onLoginSuccess: () => void;
@@ -8,13 +10,14 @@ export const Login: React.FC<Props> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { t } = useLanguage();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username === 'AVISPA' && password === 'AVISPA') {
       onLoginSuccess();
     } else {
-      setError('ACCESS DENIED: INVALID CREDENTIALS');
+      setError(t.login.access_denied);
       setPassword('');
     }
   };
@@ -49,7 +52,7 @@ export const Login: React.FC<Props> = ({ onLoginSuccess }) => {
         </div>
 
         {/* Login Box */}
-        <div className="bg-slate-900/80 border border-slate-700 backdrop-blur-md p-8 shadow-2xl relative overflow-hidden group w-full mb-12">
+        <div className="bg-slate-900/80 border border-slate-700 backdrop-blur-md p-8 shadow-2xl relative overflow-hidden group w-full mb-8">
           {/* Decorative Corner */}
           <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-avispa-accent opacity-50 group-hover:opacity-100 transition-opacity"></div>
           <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-avispa-accent opacity-50 group-hover:opacity-100 transition-opacity"></div>
@@ -57,7 +60,7 @@ export const Login: React.FC<Props> = ({ onLoginSuccess }) => {
           <form onSubmit={handleLogin} className="space-y-6 relative z-10">
             <div>
               <label className="block text-xs font-bold text-avispa-accent mb-2 font-mono uppercase">
-                // Operador ID
+                {t.login.operator}
               </label>
               <input
                 type="text"
@@ -71,7 +74,7 @@ export const Login: React.FC<Props> = ({ onLoginSuccess }) => {
 
             <div>
               <label className="block text-xs font-bold text-avispa-accent mb-2 font-mono uppercase">
-                // Clave de Acceso
+                {t.login.key}
               </label>
               <input
                 type="password"
@@ -93,9 +96,14 @@ export const Login: React.FC<Props> = ({ onLoginSuccess }) => {
               className="w-full bg-avispa-accent hover:bg-yellow-400 text-black font-black py-4 uppercase tracking-widest text-sm transition-all hover:shadow-[0_0_20px_rgba(250,204,21,0.3)] relative overflow-hidden group/btn"
               style={{ clipPath: 'polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%)' }}
             >
-              <span className="relative z-10">Inicializar Sistema</span>
+              <span className="relative z-10">{t.login.btn}</span>
             </button>
           </form>
+        </div>
+
+        {/* Language Selector */}
+        <div className="mb-8">
+            <LanguageSelector variant="login" />
         </div>
         
         {/* TALLEYRAND BRANDING FOOTER */}
@@ -119,7 +127,7 @@ export const Login: React.FC<Props> = ({ onLoginSuccess }) => {
             </div>
             <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent my-2"></div>
             <p className="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em]">
-                Desarrollado por Consultora Talleyrand © 2025
+                {t.login.dev_by}
             </p>
         </div>
       </div>

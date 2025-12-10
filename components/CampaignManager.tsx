@@ -1,30 +1,33 @@
 import React, { useState } from 'react';
 import { generateCampaignPlan } from '../services/geminiService';
 import { CampaignConfig, CampaignPlan } from '../types';
+import { useLanguage, Language } from '../i18n';
 
 interface Props {
   apiKey: string;
+  language?: Language;
 }
 
 const PLATFORMS_LIST = ['Instagram', 'TikTok', 'X', 'Facebook', 'LinkedIn', 'YouTube'];
 const FORMATS_LIST = ['Reels', 'Historias', 'Carruseles', 'Hilos', 'Video Largo', 'Imagen Estática'];
 
-export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
+export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) => {
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<CampaignPlan | null>(null);
+  const { t } = useLanguage();
 
   const [config, setConfig] = useState<CampaignConfig>({
-    magicPrompt: '',
-    duration: '1 Mes (Sostenimiento)',
+    magicPrompt: 'Campaña de posicionamiento para "Agua Bonita Coffee" como la bebida esencial que combina herencia latina con sostenibilidad para la Gen Z.',
+    duration: '2 Semanas (Intensivo)',
     startDate: new Date().toISOString().split('T')[0],
     frequency: 'Alta (Dominancia de Algoritmo)',
-    tone: 'Cercano / Ciudadano',
-    contentMix: 'Promocional (Venta Directa)',
-    kpi: 'Conversión (Intención de Voto)',
+    tone: 'Disruptivo / Viral',
+    contentMix: 'Entretenimiento (Viral)',
+    kpi: 'Alcance (Brand Awareness)',
     resourceLevel: 'Alto (Producción/Estudio)',
     platforms: ['Instagram', 'TikTok'],
-    formats: ['Reels', 'Historias', 'Carruseles'],
-    strategicObjective: ''
+    formats: ['Reels', 'Historias'],
+    strategicObjective: 'Aumentar reconocimiento de marca en un 40% y ventas directas en web.'
   });
 
   const handleCreate = async () => {
@@ -37,7 +40,8 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
         strategicObjective: config.strategicObjective || config.magicPrompt.slice(0, 100)
       };
       
-      const result = await generateCampaignPlan(apiKey, finalConfig);
+      // Fix: Cast language to Language type to avoid string mismatch
+      const result = await generateCampaignPlan(apiKey, finalConfig, language as Language);
       setPlan(result);
     } catch (e) {
       console.error(e);
@@ -60,21 +64,21 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
         <div className="flex items-center gap-3 mb-6">
             <span className="text-2xl">🗓️</span>
             <div>
-                <h2 className="text-xl font-mono font-bold text-white">GENERADOR DE CRONOPOSTING (PROFESIONAL)</h2>
-                <p className="text-xs text-slate-400">Configuración Avanzada de Matriz de Contenidos - Alta Frecuencia</p>
+                <h2 className="text-xl font-mono font-bold text-white">{t.camp.title}</h2>
+                <p className="text-xs text-slate-400">{t.camp.subtitle}</p>
             </div>
         </div>
 
         {/* MAGIC PROMPT SECTION */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-6 hover:border-avispa-accent transition-colors relative group">
             <div className="flex items-center gap-2 mb-2 text-avispa-accent font-bold text-xs uppercase tracking-wider">
-                <span className="animate-pulse">✨</span> Autoconfiguración Táctica (Magic Prompt)
+                <span className="animate-pulse">✨</span> {t.camp.magic_prompt}
             </div>
             <textarea
                 value={config.magicPrompt}
                 onChange={(e) => setConfig({ ...config, magicPrompt: e.target.value })}
                 className="w-full bg-transparent text-lg text-white placeholder-slate-600 outline-none resize-none font-light h-20"
-                placeholder="Describe tu objetivo y la IA ajustará todos los parámetros técnicos automáticamente. Ej: Campaña de Hanna para diciembre de 2025 con tal de aumentar sus votos a 30.000"
+                placeholder={t.camp.magic_placeholder}
             />
             <div className="absolute bottom-4 right-4 text-slate-500 group-hover:text-avispa-accent">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -86,10 +90,10 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
             
             {/* COLUMN 1: TEMPORAL */}
             <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Parámetros Temporales</h3>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">{t.camp.params_time}</h3>
                 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">DURACIÓN</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.duration}</label>
                     <select 
                         value={config.duration}
                         onChange={(e) => setConfig({...config, duration: e.target.value})}
@@ -103,7 +107,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">FECHA DE INICIO</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.start_date}</label>
                     <input 
                         type="date"
                         value={config.startDate}
@@ -113,7 +117,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">FRECUENCIA DE PUBLICACIÓN</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.frequency}</label>
                     <select 
                         value={config.frequency}
                         onChange={(e) => setConfig({...config, frequency: e.target.value})}
@@ -128,10 +132,10 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
 
             {/* COLUMN 2: STRATEGY */}
             <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Estrategia de Contenido</h3>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">{t.camp.params_strat}</h3>
                 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">TONO DE COMUNICACIÓN</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.tone}</label>
                     <select 
                         value={config.tone}
                         onChange={(e) => setConfig({...config, tone: e.target.value})}
@@ -145,7 +149,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">MIX DE CONTENIDO (REGLA)</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.mix}</label>
                     <select 
                         value={config.contentMix}
                         onChange={(e) => setConfig({...config, contentMix: e.target.value})}
@@ -159,7 +163,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">KPI PRINCIPAL</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.kpi}</label>
                     <select 
                         value={config.kpi}
                         onChange={(e) => setConfig({...config, kpi: e.target.value})}
@@ -175,10 +179,10 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
 
             {/* COLUMN 3: CHANNELS & RESOURCES */}
             <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Canales y Recursos</h3>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">{t.camp.params_res}</h3>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1">NIVEL DE RECURSOS (PRODUCCIÓN)</label>
+                    <label className="block text-xs text-slate-400 mb-1">{t.camp.res_level}</label>
                     <select 
                         value={config.resourceLevel}
                         onChange={(e) => setConfig({...config, resourceLevel: e.target.value})}
@@ -191,7 +195,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-2">PLATAFORMAS ACTIVAS</label>
+                    <label className="block text-xs text-slate-400 mb-2">{t.camp.platforms}</label>
                     <div className="flex flex-wrap gap-2">
                         {PLATFORMS_LIST.map(p => (
                             <button
@@ -210,7 +214,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-slate-400 mb-2">FORMATOS CLAVE</label>
+                    <label className="block text-xs text-slate-400 mb-2">{t.camp.formats}</label>
                     <div className="flex flex-wrap gap-2">
                         {FORMATS_LIST.map(f => (
                             <button
@@ -232,7 +236,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
 
         {/* BOTTOM SECTION */}
         <div className="bg-slate-800/30 p-4 rounded border border-slate-800">
-             <label className="block text-xs text-slate-400 mb-1 font-bold">OBJETIVO ESTRATÉGICO (Y)</label>
+             <label className="block text-xs text-slate-400 mb-1 font-bold">{t.camp.obj_y}</label>
              <input 
                 type="text"
                 value={config.strategicObjective}
@@ -252,11 +256,11 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 {loading ? (
                     <>
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                        PROCESANDO ESTRATEGIA...
+                        {t.camp.processing}
                     </>
                 ) : (
                     <>
-                        GENERAR ESTRATEGIA
+                        {t.camp.generate}
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                     </>
                 )}
@@ -272,7 +276,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                 <div className="p-6 bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-lg shadow-2xl">
                     <div className="flex justify-between items-start mb-4">
                         <h3 className="text-2xl font-bold text-white font-mono">{plan.productName.toUpperCase()}</h3>
-                        <span className="bg-avispa-accent text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Plan Activo</span>
+                        <span className="bg-avispa-accent text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{t.camp.active_plan}</span>
                     </div>
                     <p className="text-slate-300 leading-relaxed font-light text-lg">{plan.strategySummary}</p>
                 </div>
@@ -290,7 +294,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                                 <div className="bg-slate-900/50 p-4 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-slate-800 text-slate-300 font-mono text-sm px-3 py-1 rounded border border-slate-700">
-                                            DÍA {step.day}
+                                            DIA {step.day}
                                         </div>
                                         {step.date && <span className="text-xs text-slate-500 font-mono">{step.date}</span>}
                                         <h4 className="font-bold text-white">{step.phase}</h4>
@@ -304,7 +308,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
                                 {/* Card Body */}
                                 <div className="p-5">
                                     <div className="mb-4">
-                                        <p className="text-sm text-slate-400 uppercase tracking-widest text-[10px] mb-1 font-bold">Instrucciones de Producción</p>
+                                        <p className="text-sm text-slate-400 uppercase tracking-widest text-[10px] mb-1 font-bold">{t.camp.production}</p>
                                         <p className="text-slate-200 font-light leading-relaxed whitespace-pre-wrap bg-slate-800/30 p-3 rounded border border-white/5">
                                             {step.contentParams}
                                         </p>
@@ -324,7 +328,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey }) => {
         {!plan && !loading && (
              <div className="h-64 flex flex-col items-center justify-center text-slate-600 border-2 border-dashed border-slate-800 rounded-lg">
                 <span className="text-4xl mb-4 opacity-50">📊</span>
-                <p className="font-mono text-lg text-slate-500">NO HAY ESTRATEGIA GENERADA</p>
+                <p className="font-mono text-lg text-slate-500">{t.camp.no_plan}</p>
                 <p className="text-sm opacity-50">Configura los parámetros superiores para iniciar.</p>
             </div>
         )}

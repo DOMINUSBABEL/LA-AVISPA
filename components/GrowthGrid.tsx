@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
 import { generateGrowthMatrix } from '../services/geminiService';
 import { GrowthMatrixData } from '../types';
+import { useLanguage, Language } from '../i18n';
 
 interface Props {
   apiKey: string;
+  language?: Language;
 }
 
-export const GrowthGrid: React.FC<Props> = ({ apiKey }) => {
-  const [product, setProduct] = useState('');
-  const [personas, setPersonas] = useState<string[]>(['CTO Startup', 'Gen Z Gamer', 'Digital Nomad']);
-  const [valueProps, setValueProps] = useState<string[]>(['Cost Efficiency', 'Status', 'Convenience']);
+export const GrowthGrid: React.FC<Props> = ({ apiKey, language = 'es' }) => {
+  const [product, setProduct] = useState('Agua Bonita (Beverage Brand)');
+  const [personas, setPersonas] = useState<string[]>(['The Culture Curator (Gen Z)', 'The Wellness Maximizer', 'The Nostalgic Millennial']);
+  const [valueProps, setValueProps] = useState<string[]>(['Rescued/Real Ingredients', 'Unapologetic Heritage', 'Guilt-Free Energy']);
   const [matrixData, setMatrixData] = useState<GrowthMatrixData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCell, setSelectedCell] = useState<GrowthMatrixData | null>(null);
+  const { t } = useLanguage();
 
   const handleGenerate = async () => {
     if (!product || !apiKey) return;
     setLoading(true);
     setMatrixData([]); // Clear previous
     try {
-      const data = await generateGrowthMatrix(apiKey, product, personas, valueProps);
+      // Fix: Cast language to Language type to avoid string mismatch
+      const data = await generateGrowthMatrix(apiKey, product, personas, valueProps, language as Language);
       setMatrixData(data);
     } catch (e) {
       alert("Failed to generate matrix");
@@ -35,21 +39,21 @@ export const GrowthGrid: React.FC<Props> = ({ apiKey }) => {
   return (
     <div className="h-full flex flex-col bg-avispa-dark text-slate-200 overflow-hidden">
       <div className="p-6 border-b border-avispa-panel flex justify-between items-center bg-slate-900/50">
-        <h2 className="text-2xl font-mono font-bold text-avispa-accent">GROWTH_GRID</h2>
+        <h2 className="text-2xl font-mono font-bold text-avispa-accent">{t.grid.title}</h2>
         <div className="flex gap-4 items-center">
             <input 
                 type="text" 
                 value={product}
                 onChange={e => setProduct(e.target.value)}
-                placeholder="Product Name..."
-                className="bg-slate-800 border border-slate-600 px-3 py-2 rounded text-sm w-64 focus:border-avispa-accent outline-none"
+                placeholder={t.grid.placeholder}
+                className="bg-slate-800 border border-slate-600 px-3 py-2 rounded text-sm w-64 focus:border-avispa-accent outline-none font-mono text-white"
             />
             <button 
                 onClick={handleGenerate}
                 disabled={loading || !product}
                 className="bg-white text-avispa-dark px-4 py-2 text-sm font-bold hover:bg-slate-200 disabled:opacity-50"
             >
-                {loading ? 'CALCULATING...' : 'GENERATE MATRIX'}
+                {loading ? t.grid.calculating : t.grid.generate}
             </button>
         </div>
       </div>
@@ -60,7 +64,7 @@ export const GrowthGrid: React.FC<Props> = ({ apiKey }) => {
         <div className="flex-1 overflow-auto">
             {/* Headers */}
             <div className="grid gap-2 mb-2" style={{ gridTemplateColumns: `150px repeat(${valueProps.length}, 1fr)` }}>
-                <div className="flex items-end justify-center pb-2 text-xs font-mono text-slate-500">PERSONA \ USP</div>
+                <div className="flex items-end justify-center pb-2 text-xs font-mono text-slate-500">{t.grid.headers}</div>
                 {valueProps.map((vp, i) => (
                     <div key={i} className="text-center font-bold text-avispa-accent text-sm p-2 bg-slate-800/50 border border-slate-700">
                         {vp}
@@ -110,28 +114,28 @@ export const GrowthGrid: React.FC<Props> = ({ apiKey }) => {
             {selectedCell ? (
                 <div className="space-y-6">
                     <div>
-                        <span className="text-xs font-mono text-slate-500 block mb-1">COORDINATES</span>
+                        <span className="text-xs font-mono text-slate-500 block mb-1">{t.grid.details}</span>
                         <div className="text-lg font-bold text-white">{selectedCell.persona}</div>
                         <div className="text-sm text-avispa-accent">{selectedCell.valueProp}</div>
                     </div>
 
                     <div className="p-4 bg-slate-900 border border-slate-700 rounded">
-                        <span className="text-xs font-mono text-slate-500 block mb-2">HOOK / HEADLINE</span>
+                        <span className="text-xs font-mono text-slate-500 block mb-2">{t.grid.hook}</span>
                         <p className="text-xl font-serif text-white">{selectedCell.payload.headline}</p>
                     </div>
 
                     <div>
-                        <span className="text-xs font-mono text-slate-500 block mb-1">PAIN POINT</span>
+                        <span className="text-xs font-mono text-slate-500 block mb-1">{t.grid.pain}</span>
                         <p className="text-sm text-slate-300 italic">"{selectedCell.payload.painPoint}"</p>
                     </div>
 
                     <div>
-                        <span className="text-xs font-mono text-slate-500 block mb-1">SOLUTION PITCH</span>
+                        <span className="text-xs font-mono text-slate-500 block mb-1">{t.grid.solution}</span>
                         <p className="text-sm text-slate-300">{selectedCell.payload.solutionPitch}</p>
                     </div>
 
                     <div>
-                        <span className="text-xs font-mono text-slate-500 block mb-1">RECOMMENDED CHANNEL</span>
+                        <span className="text-xs font-mono text-slate-500 block mb-1">{t.grid.channel}</span>
                         <span className="inline-block px-3 py-1 bg-avispa-accent text-white text-xs font-bold rounded">
                             {selectedCell.payload.channel}
                         </span>
@@ -139,7 +143,7 @@ export const GrowthGrid: React.FC<Props> = ({ apiKey }) => {
                 </div>
             ) : (
                 <div className="h-full flex items-center justify-center text-slate-500 text-center">
-                    <p>Select a matrix cell to reveal viral payload details.</p>
+                    <p>{t.grid.empty}</p>
                 </div>
             )}
         </div>

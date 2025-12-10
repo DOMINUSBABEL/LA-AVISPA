@@ -51,9 +51,15 @@ export interface CampaignPlan {
   steps: CampaignStep[];
 }
 
+export type CampaignMode = 'GROWTH' | 'DOMINATION';
+
 export interface CampaignConfig {
   magicPrompt: string;
   
+  // New Fields for Competitor Suppression
+  campaignMode: CampaignMode;
+  targetRivals: string;
+
   // Parámetros Temporales
   duration: string;
   startDate: string;

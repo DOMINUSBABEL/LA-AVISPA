@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { generateCampaignPlan } from '../services/geminiService';
-import { CampaignConfig, CampaignPlan } from '../types';
+import { CampaignConfig, CampaignPlan, CampaignMode } from '../types';
 import { useLanguage, Language } from '../i18n';
 
 interface Props {
@@ -18,6 +18,8 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
 
   const [config, setConfig] = useState<CampaignConfig>({
     magicPrompt: 'Campaña de posicionamiento para "Agua Bonita Coffee" como la bebida esencial que combina herencia latina con sostenibilidad para la Gen Z.',
+    campaignMode: 'GROWTH',
+    targetRivals: '',
     duration: '2 Semanas (Intensivo)',
     startDate: new Date().toISOString().split('T')[0],
     frequency: 'Alta (Dominancia de Algoritmo)',
@@ -29,6 +31,21 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
     formats: ['Reels', 'Historias'],
     strategicObjective: 'Aumentar reconocimiento de marca en un 40% y ventas directas en web.'
   });
+
+  // Dynamic Options based on Mode
+  const getToneOptions = () => {
+    if (config.campaignMode === 'DOMINATION') {
+      return ['Comparativo / Agresivo', 'Desmitificador / "Fact-Check"', 'Superioridad Moral', 'Satírico / Burlón', 'Urgente / Alerta'];
+    }
+    return ['Cercano / Ciudadano', 'Corporativo / Serio', 'Disruptivo / Viral', 'Inspiracional / Épico'];
+  };
+
+  const getKpiOptions = () => {
+    if (config.campaignMode === 'DOMINATION') {
+      return ['Robo de Cuota (Market Share)', 'Supresión de Ruido Rival', 'Contraste de Valor', 'Retención Defensiva'];
+    }
+    return ['Conversión (Intención de Voto)', 'Leads (Captación)', 'Alcance (Brand Awareness)', 'Engagement (Comunidad)'];
+  };
 
   const handleCreate = async () => {
     if (!config.magicPrompt || !apiKey) return;
@@ -58,20 +75,61 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
   };
 
   return (
-    <div className="h-full bg-avispa-dark text-slate-200 overflow-y-auto">
+    <div className={`h-full bg-avispa-dark text-slate-200 overflow-y-auto transition-colors duration-700 ${config.campaignMode === 'DOMINATION' ? 'selection:bg-red-900 selection:text-white' : ''}`}>
       {/* HEADER PANEL */}
-      <div className="p-8 border-b border-avispa-panel bg-slate-900 sticky top-0 z-20 shadow-xl">
-        <div className="flex items-center gap-3 mb-6">
-            <span className="text-2xl">🗓️</span>
-            <div>
-                <h2 className="text-xl font-mono font-bold text-white">{t.camp.title}</h2>
-                <p className="text-xs text-slate-400">{t.camp.subtitle}</p>
+      <div className={`p-8 border-b transition-colors duration-500 sticky top-0 z-20 shadow-xl ${config.campaignMode === 'DOMINATION' ? 'bg-red-950/90 border-red-900' : 'bg-slate-900 border-avispa-panel'}`}>
+        <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+                <span className="text-2xl">{config.campaignMode === 'DOMINATION' ? '⚔️' : '🗓️'}</span>
+                <div>
+                    <h2 className={`text-xl font-mono font-bold ${config.campaignMode === 'DOMINATION' ? 'text-red-500' : 'text-white'}`}>
+                        {t.camp.title}
+                    </h2>
+                    <p className="text-xs text-slate-400">{t.camp.subtitle}</p>
+                </div>
+            </div>
+
+            {/* MODE TOGGLE */}
+            <div className="flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-white/10">
+                <button
+                    onClick={() => setConfig({ ...config, campaignMode: 'GROWTH' })}
+                    className={`px-4 py-2 text-[10px] font-bold tracking-widest rounded transition-all ${config.campaignMode === 'GROWTH' ? 'bg-avispa-accent text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                >
+                    {t.camp.mode_growth}
+                </button>
+                <button
+                    onClick={() => setConfig({ ...config, campaignMode: 'DOMINATION' })}
+                    className={`px-4 py-2 text-[10px] font-bold tracking-widest rounded transition-all ${config.campaignMode === 'DOMINATION' ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.6)]' : 'text-slate-500 hover:text-white'}`}
+                >
+                    {t.camp.mode_domination}
+                </button>
             </div>
         </div>
 
+        {/* DOMINATION MODE WARNING & INPUT */}
+        {config.campaignMode === 'DOMINATION' && (
+            <div className="mb-6 animate-pulse-slow">
+                <div className="bg-red-900/20 border border-red-800 p-4 rounded-lg mb-4">
+                    <p className="text-red-400 text-xs font-bold font-mono tracking-wider flex items-center gap-2">
+                        {t.camp.warn_aggressive}
+                    </p>
+                </div>
+                <div>
+                    <label className="block text-xs text-red-400 mb-1 font-bold tracking-widest uppercase">{t.camp.rivals_label}</label>
+                    <input 
+                        type="text"
+                        value={config.targetRivals}
+                        onChange={(e) => setConfig({...config, targetRivals: e.target.value})}
+                        placeholder={t.camp.rivals_placeholder}
+                        className="w-full bg-red-950/50 border border-red-800 text-white p-3 rounded focus:border-red-500 outline-none font-mono text-sm placeholder-red-900/50"
+                    />
+                </div>
+            </div>
+        )}
+
         {/* MAGIC PROMPT SECTION */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-6 hover:border-avispa-accent transition-colors relative group">
-            <div className="flex items-center gap-2 mb-2 text-avispa-accent font-bold text-xs uppercase tracking-wider">
+        <div className={`bg-slate-800/50 border rounded-lg p-4 mb-6 transition-colors relative group ${config.campaignMode === 'DOMINATION' ? 'border-red-900/50 hover:border-red-500' : 'border-slate-700 hover:border-avispa-accent'}`}>
+            <div className={`flex items-center gap-2 mb-2 font-bold text-xs uppercase tracking-wider ${config.campaignMode === 'DOMINATION' ? 'text-red-500' : 'text-avispa-accent'}`}>
                 <span className="animate-pulse">✨</span> {t.camp.magic_prompt}
             </div>
             <textarea
@@ -80,9 +138,6 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
                 className="w-full bg-transparent text-lg text-white placeholder-slate-600 outline-none resize-none font-light h-20"
                 placeholder={t.camp.magic_placeholder}
             />
-            <div className="absolute bottom-4 right-4 text-slate-500 group-hover:text-avispa-accent">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </div>
         </div>
 
         {/* PARAMETERS GRID */}
@@ -139,12 +194,9 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
                     <select 
                         value={config.tone}
                         onChange={(e) => setConfig({...config, tone: e.target.value})}
-                        className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-white focus:border-avispa-accent outline-none"
+                        className={`w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-white outline-none ${config.campaignMode === 'DOMINATION' ? 'focus:border-red-500 text-red-200 font-bold' : 'focus:border-avispa-accent'}`}
                     >
-                        <option>Cercano / Ciudadano</option>
-                        <option>Corporativo / Serio</option>
-                        <option>Disruptivo / Viral</option>
-                        <option>Inspiracional / Épico</option>
+                        {getToneOptions().map(opt => <option key={opt}>{opt}</option>)}
                     </select>
                 </div>
 
@@ -167,12 +219,9 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
                     <select 
                         value={config.kpi}
                         onChange={(e) => setConfig({...config, kpi: e.target.value})}
-                        className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-white focus:border-avispa-accent outline-none"
+                        className={`w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-white outline-none ${config.campaignMode === 'DOMINATION' ? 'focus:border-red-500 text-red-200 font-bold' : 'focus:border-avispa-accent'}`}
                     >
-                        <option>Conversión (Intención de Voto)</option>
-                        <option>Leads (Captación)</option>
-                        <option>Alcance (Brand Awareness)</option>
-                        <option>Engagement (Comunidad)</option>
+                        {getKpiOptions().map(opt => <option key={opt}>{opt}</option>)}
                     </select>
                 </div>
             </div>
@@ -251,7 +300,7 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
             <button
                 onClick={handleCreate}
                 disabled={loading || !config.magicPrompt}
-                className="bg-avispa-accent hover:bg-orange-600 text-white font-bold py-3 px-8 rounded shadow-lg shadow-orange-900/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${config.campaignMode === 'DOMINATION' ? 'bg-red-600 hover:bg-red-500 shadow-red-900/30' : 'bg-avispa-accent hover:bg-orange-600 shadow-orange-900/20'} text-white font-bold py-3 px-8 rounded shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
                 {loading ? (
                     <>
@@ -273,23 +322,23 @@ export const CampaignManager: React.FC<Props> = ({ apiKey, language = 'es' }) =>
         {plan && (
              <div className="animate-fade-in space-y-8">
                 {/* Summary Card */}
-                <div className="p-6 bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+                <div className={`p-6 bg-gradient-to-r border rounded-lg shadow-2xl ${config.campaignMode === 'DOMINATION' ? 'from-red-950 to-slate-900 border-red-800' : 'from-slate-800 to-slate-900 border-slate-700'}`}>
                     <div className="flex justify-between items-start mb-4">
                         <h3 className="text-2xl font-bold text-white font-mono">{plan.productName.toUpperCase()}</h3>
-                        <span className="bg-avispa-accent text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{t.camp.active_plan}</span>
+                        <span className={`text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${config.campaignMode === 'DOMINATION' ? 'bg-red-600' : 'bg-avispa-accent'}`}>{t.camp.active_plan}</span>
                     </div>
                     <p className="text-slate-300 leading-relaxed font-light text-lg">{plan.strategySummary}</p>
                 </div>
 
                 {/* Timeline */}
-                <div className="relative border-l-2 border-slate-700 ml-4 space-y-8 pb-12">
+                <div className={`relative border-l-2 ml-4 space-y-8 pb-12 ${config.campaignMode === 'DOMINATION' ? 'border-red-900/50' : 'border-slate-700'}`}>
                     {plan.steps.map((step, idx) => (
                         <div key={idx} className="relative pl-8 group">
                             {/* Timeline Dot */}
-                            <span className="absolute -left-[9px] top-6 w-4 h-4 rounded-full bg-slate-900 border-2 border-avispa-accent group-hover:bg-avispa-accent transition-colors shadow-[0_0_10px_rgba(249,115,22,0.5)]"></span>
+                            <span className={`absolute -left-[9px] top-6 w-4 h-4 rounded-full bg-slate-900 border-2 transition-colors shadow-[0_0_10px_rgba(249,115,22,0.5)] ${config.campaignMode === 'DOMINATION' ? 'border-red-500 group-hover:bg-red-500' : 'border-avispa-accent group-hover:bg-avispa-accent'}`}></span>
                             
                             {/* Card */}
-                            <div className="bg-avispa-panel border border-slate-700 rounded-lg overflow-hidden hover:border-avispa-accent transition-all shadow-lg group-hover:shadow-2xl">
+                            <div className={`bg-avispa-panel border rounded-lg overflow-hidden transition-all shadow-lg group-hover:shadow-2xl ${config.campaignMode === 'DOMINATION' ? 'border-red-900/30 hover:border-red-500' : 'border-slate-700 hover:border-avispa-accent'}`}>
                                 {/* Card Header */}
                                 <div className="bg-slate-900/50 p-4 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
                                     <div className="flex items-center gap-3">

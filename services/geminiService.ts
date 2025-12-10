@@ -181,6 +181,26 @@ export const generateCampaignPlan = async (
 ): Promise<CampaignPlan> => {
   const ai = getClient(apiKey);
 
+  // Determine specific instructions based on Mode
+  let modeInstructions = "";
+  if (config.campaignMode === 'DOMINATION') {
+    modeInstructions = `
+      WARNING: This is a COMPETITOR SUPPRESSION / DOMINATION campaign.
+      TARGET RIVALS: ${config.targetRivals}
+      
+      TACTICAL INSTRUCTIONS:
+      1. Aggressive Differentiation: Explicitly contrast our strengths vs rival weaknesses.
+      2. Market Saturation: High frequency, use rival hashtags/keywords if platform appropriate.
+      3. Counter-Programming: Design posts to "steal the spotlight" from competitors.
+      4. Tone: Confident, Fact-Checking, Disruptive, Superior.
+      5. KPI Focus: Market Share Theft, Rival Noise Suppression.
+    `;
+  } else {
+    modeInstructions = `
+      Standard Growth Campaign. Focus on brand values, community building, and organic reach.
+    `;
+  }
+
   const prompt = `
     Create a highly professional Marketing Cronoposting Plan (Campaign Schedule).
     
@@ -188,6 +208,9 @@ export const generateCampaignPlan = async (
 
     INPUT CONTEXT (MAGIC PROMPT): "${config.magicPrompt}"
     STRATEGIC OBJECTIVE: "${config.strategicObjective}"
+    
+    OPERATIONAL MODE: ${config.campaignMode}
+    ${modeInstructions}
     
     TECHNICAL PARAMETERS:
     - Duration: ${config.duration}
@@ -202,7 +225,7 @@ export const generateCampaignPlan = async (
     KEY FORMATS: ${config.formats.join(', ')}
 
     Task:
-    1. Summarize the strategy based on the Magic Prompt and Objective.
+    1. Summarize the strategy based on the Magic Prompt, Objective and Mode.
     2. Generate a 7-step cronoposting schedule (representing key beats of the campaign).
     3. Strictly assign formats and channels from the provided lists.
     4. Ensure the Content Params are detailed and match the "Resource Level" (e.g. if High, ask for studio quality).

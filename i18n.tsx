@@ -68,7 +68,14 @@ export const translations = {
         obj_y: 'OBJETIVO ESTRATÉGICO (Y)',
         active_plan: 'Plan Activo',
         production: 'Instrucciones de Producción',
-        no_plan: 'NO HAY ESTRATEGIA GENERADA'
+        no_plan: 'NO HAY ESTRATEGIA GENERADA',
+        // New Suppression Mode keys
+        mode_label: 'MODO OPERATIVO',
+        mode_growth: 'CRECIMIENTO (ESTÁNDAR)',
+        mode_domination: 'DOMINACIÓN (SUPRESIÓN)',
+        rivals_label: 'OBJETIVOS HOSTILES (RIVALES)',
+        rivals_placeholder: 'Ej: Competidor A, Marca B...',
+        warn_aggressive: '⚠️ MODO GUERRA ACTIVO: La estrategia se centrará en comparativas directas y saturación.'
     }
   },
   en: {
@@ -136,7 +143,14 @@ export const translations = {
         obj_y: 'STRATEGIC OBJECTIVE (Y)',
         active_plan: 'Active Plan',
         production: 'Production Instructions',
-        no_plan: 'NO STRATEGY GENERATED'
+        no_plan: 'NO STRATEGY GENERATED',
+        // New Suppression Mode keys
+        mode_label: 'OPERATING MODE',
+        mode_growth: 'GROWTH (STANDARD)',
+        mode_domination: 'DOMINANCE (SUPPRESSION)',
+        rivals_label: 'HOSTILE TARGETS (RIVALS)',
+        rivals_placeholder: 'Ex: Competitor A, Brand B...',
+        warn_aggressive: '⚠️ WAR MODE ACTIVE: Strategy will focus on direct comparison and saturation.'
     }
   },
   fr: {
@@ -204,7 +218,14 @@ export const translations = {
         obj_y: 'OBJECTIF STRATÉGIQUE (Y)',
         active_plan: 'Plan Actif',
         production: 'Instructions de Production',
-        no_plan: 'AUCUNE STRATÉGIE GÉNÉRÉE'
+        no_plan: 'AUCUNE STRATÉGIE GÉNÉRÉE',
+        // New Suppression Mode keys
+        mode_label: 'MODE OPÉRATOIRE',
+        mode_growth: 'CROISSANCE (STANDARD)',
+        mode_domination: 'DOMINATION (SUPPRESSION)',
+        rivals_label: 'CIBLES HOSTILES (RIVAUX)',
+        rivals_placeholder: 'Ex : Concurrent A, Marque B...',
+        warn_aggressive: '⚠️ MODE GUERRE ACTIF : La stratégie se concentrera sur la comparaison directe et la saturation.'
     }
   },
   de: {
@@ -272,7 +293,14 @@ export const translations = {
         obj_y: 'STRATEGISCHES ZIEL (Y)',
         active_plan: 'Aktiver Plan',
         production: 'Produktionsanweisungen',
-        no_plan: 'KEINE STRATEGIE GENERIERT'
+        no_plan: 'KEINE STRATEGIE GENERIERT',
+        // New Suppression Mode keys
+        mode_label: 'BETRIEBSART',
+        mode_growth: 'WACHSTUM (STANDARD)',
+        mode_domination: 'DOMINANZ (UNTERDRÜCKUNG)',
+        rivals_label: 'FEINDLICHE ZIELE (RIVALEN)',
+        rivals_placeholder: 'Bsp: Konkurrent A, Marke B...',
+        warn_aggressive: '⚠️ KRIEGSMODUS AKTIV: Die Strategie konzentriert sich auf direkten Vergleich und Sättigung.'
     }
   }
 };
